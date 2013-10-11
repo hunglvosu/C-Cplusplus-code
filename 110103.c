@@ -45,12 +45,12 @@ void process(float *p, int length){
  avg = round2f(sum / length);
  //printf("avg: %f\n", avg);
  float exchange = 0.0f;
- float gamount = 0.0f;
+ float residual= 0.0f;
  float ramount = 0.0f;
  if (sum > avg*length){
    for (i = 0; i < length; i++){
 	if(*(p+i) > avg){
-	    gamount += *(p+i) - avg;
+	    residual += *(p+i) - avg - 0.01f;
         }else {
 	    ramount += avg - *(p+i);
 	}
@@ -67,6 +67,7 @@ void process(float *p, int length){
  }
  //printf("exchange:%0.2f\n",exchange);
  //fprintf(ofp, "$%.2f\n",exchange);
+ if (residual > ramount) exchange += residual - ramount;
  printf("$%.2f\n",exchange);
 
 }
