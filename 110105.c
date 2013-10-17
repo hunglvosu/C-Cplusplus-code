@@ -156,16 +156,16 @@ void fillPixels(char **img, int x, int y, char c1, char c2){
   if(img[y-1][x-1] == c1){
     img[y-1][x-1] = c2;
   } else return;
- if (y + 1 < M  && img[y][x-1] == c1){
+ if (y < N) if( img[y][x-1] == c1){
    fillPixels(img, x,  y + 1, c1, c2);
  } 
- if(x + 1 < N  && img[y-1][x] == c1){
+ if(x < M ) if( img[y-1][x] == c1){
    fillPixels(img, x + 1, y, c1, c2);
   }
- if ( y - 1 > 0 && img[y-2][x-1] == c1){
+ if ( y - 1 > 0) if( img[y-2][x-1] == c1){
    fillPixels(img, x, y -1, c1, c2);
  }
- if(x-1 > 0 && img[y-1][x-2] == c1){
+ if(x-1 > 0 )if( img[y-1][x-2] == c1){
    fillPixels(img, x-1, y, c1, c2);
 }
  
