@@ -2,6 +2,13 @@
 #include<stdlib.h>
 #include<string.h>
 
+struct stackElement{
+  int x;
+  int y;
+  struct stackElement *next;
+};
+typedef struct stackElement selement;
+
 char **initImg(char **imgdata,int N, int M);
 void clear(char **imgdata, int N, int M);
 void coloringpixel(char **imgdata,int x, int y, char c);
@@ -10,23 +17,27 @@ void drawHorizontal(char **imgdata, int x1, int x2, int y, char c);
 void drawRectangle(char **imgdata,int x1,int y1, int x2, int y2,
 			 char c);
 void fillRegion(char **img, int x, int y, char c);
-void fillPixels(char **img, int x, int y, char c1, char c2);
 void save(char **imgdata, char *name);
 void printImg(char **imgdata, int N, int M);
+void push(int x, int y, selement *shead);
+selement *pop(selement *head);
+
+selement *shead;
 char **img;
 int N,M;
 
 int main(){
+ shead = (selement *)malloc(sizeof(struct stackElement));
+ shead->x = -1;
+ shead->y = -1;
+
 char c;
 char inst;
 char *b ;
-//scanf("%s",b);
-//printf("input is %s", b);
 int x, y, x1, y1, x2, y2;
  while(1){ 
   scanf("%c",&inst);
   int isBreak = 0;
- // printf("your input char is %c\n",c);
   switch(inst) {
     case 'I':
 	{
@@ -47,7 +58,6 @@ int x, y, x1, y1, x2, y2;
 	{
 	scanf("%d %d %c",&x,&y,&c);
 	img[y-1][x-1] = c;
-	//printImg(img,N,M); 
 	break;
 	}
     case 'H':
@@ -72,7 +82,6 @@ int x, y, x1, y1, x2, y2;
 	{
 	char name[13];
 	scanf("%s",name);
-//	gets(name);
 	printf("%s\n", name);
 	printImg(img,N,M);
 	break;
@@ -87,6 +96,7 @@ int x, y, x1, y1, x2, y2;
   } 
   if (isBreak) break;
  }
+ free(img);
 }
 
 void printImg(char **imgdata, int N, int M){
@@ -109,7 +119,6 @@ char **initImg(char **imgdata, int N, int M){
 	imgdata[i][j] = '0';
    }
  }
- //printImg(imgdata, N,M);
  return imgdata; 
 }
 
@@ -147,26 +156,44 @@ void drawRectangle(char **imgdata, int x1, int y1, int x2, int y2,
    }
 }
 
-void fillRegion(char **imgdata, int x, int y, char c){
-   char cxy = imgdata[y-1][x-1];
-   fillPixels(imgdata, x, y, cxy, c);
+void fillRegion(char **imgdata, int x1, int y1, char c1){
+   char cxy = imgdata[y1-1][x1-1];
+   push(x1, y1 , shead);
+   int x, y;
+   while(shead->next != NULL){
+	selement *elem = pop(shead);
+ 	x = elem->x;
+	 y = elem->y;
+	img[y -1][x -1] = c1;
+	if(y < N){
+	 if(img[y][x-1] == cxy) push(x, y + 1, shead);
+	}
+	if(x< M){
+	 if(img[y-1][x] == cxy) push(x+1, y, shead);
+	}
+ 	if(y-1>0){
+	 if(img[y-2][x-1] == cxy) push(x, y-1, shead);
+	}
+	if(x-1 > 0){
+	 if(img[y-1][x-2] == cxy) push(x-1, y, shead);
+	}
+  }
+}
+
+void push(int x, int y, selement *head){ 
+ selement *stop = head->next;
+ selement *temp = (selement *) malloc(
+			sizeof(struct stackElement));
+ temp->x = x;
+ temp->y = y;
+ head->next = temp;
+ temp->next = stop;
 
 }
-void fillPixels(char **img, int x, int y, char c1, char c2){
-  if(img[y-1][x-1] == c1){
-    img[y-1][x-1] = c2;
-  } else return;
- if (y < N) if( img[y][x-1] == c1){
-   fillPixels(img, x,  y + 1, c1, c2);
- } 
- if(x < M ) if( img[y-1][x] == c1){
-   fillPixels(img, x + 1, y, c1, c2);
-  }
- if ( y - 1 > 0) if( img[y-2][x-1] == c1){
-   fillPixels(img, x, y -1, c1, c2);
- }
- if(x-1 > 0 )if( img[y-1][x-2] == c1){
-   fillPixels(img, x-1, y, c1, c2);
-}
- 
+
+selement *pop(selement *head){
+ selement *elem = shead->next;
+ selement *elemnext = elem->next;
+ shead->next = elemnext;
+ return elem;
 }
