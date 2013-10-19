@@ -1,13 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-
-struct stackElement{
-  int x;
-  int y;
-  struct stackElement *next;
-};
-typedef struct stackElement selement;
+#define DEFAULT_SIZE 10000 
+typedef struct{
+ int *x;
+ int *y;
+ int top;
+ int size;
+}Stack;
 
 char **initImg(char **imgdata,int N, int M);
 void clear(char **imgdata, int N, int M);
@@ -19,18 +19,16 @@ void drawRectangle(char **imgdata,int x1,int y1, int x2, int y2,
 void fillRegion(char **img, int x, int y, char c);
 void save(char **imgdata, char *name);
 void printImg(char **imgdata, int N, int M);
-void push(int x, int y, selement *shead);
-selement *pop(selement *head);
+void initStack(Stack *s, size_t size);
+void push(int x, int y, Stack *s);
+void pop(Stack *s, int *x, int *y);
 
-selement *shead;
 char **img;
 int N,M;
+Stack s;
 
 int main(){
- shead = (selement *)malloc(sizeof(struct stackElement));
- shead->x = -1;
- shead->y = -1;
-
+initStack(&s, DEFAULT_SIZE);
 char c;
 char inst;
 char *b ;
@@ -158,42 +156,51 @@ void drawRectangle(char **imgdata, int x1, int y1, int x2, int y2,
 
 void fillRegion(char **imgdata, int x1, int y1, char c1){
    char cxy = imgdata[y1-1][x1-1];
-   push(x1, y1 , shead);
-   int x, y;
-   while(shead->next != NULL){
-	selement *elem = pop(shead);
- 	x = elem->x;
-	 y = elem->y;
-	img[y -1][x -1] = c1;
-	if(y < N){
-	 if(img[y][x-1] == cxy) push(x, y + 1, shead);
+   push(x1, y1, &s);
+   int a, b;
+   while(s.top > -1 ){
+	pop(&s, &a, &b);
+	imgdata[b -1][a -1] = c1;
+	if(b < N){
+	 if(imgdata[b][a-1] == cxy) push(a, b + 1, &s);
 	}
-	if(x< M){
-	 if(img[y-1][x] == cxy) push(x+1, y, shead);
+	if(a< M){
+	 if(imgdata[b-1][a] == cxy) push(a+1, b, &s);
 	}
- 	if(y-1>0){
-	 if(img[y-2][x-1] == cxy) push(x, y-1, shead);
+	if(b-1>0){
+	 if(imgdata[b-2][a-1] == cxy) push(a, b-1,&s);
 	}
-	if(x-1 > 0){
-	 if(img[y-1][x-2] == cxy) push(x-1, y, shead);
+	if(a-1 > 0){
+	 if(imgdata[b-1][a-2] == cxy) push(a-1, b, &s);
 	}
   }
 }
 
-void push(int x, int y, selement *head){ 
- selement *stop = head->next;
- selement *temp = (selement *) malloc(
-			sizeof(struct stackElement));
- temp->x = x;
- temp->y = y;
- head->next = temp;
- temp->next = stop;
-
+void push(int x, int y, Stack *s){ 
+ s->top++;
+ s->x[s->top] = x;
+ s->y[s->top] = y;
+ if(s->top == s->size-1){
+   s->size = s->size + DEFAULT_SIZE;
+   s->x = (int *) realloc(s->x, s->size*sizeof(int));
+   s->y = (int *) realloc(s->y, s->size*sizeof(int));
+ }  
+ 
 }
 
-selement *pop(selement *head){
- selement *elem = shead->next;
- selement *elemnext = elem->next;
- shead->next = elemnext;
- return elem;
+void pop(Stack *s, int *a, int *b){
+ if(s->top > -1 ){
+   *a = s->x[s->top];
+   *b = s->y[s->top];
+   s->top --;
+ } else{
+   printf("Stack is empty\n");
+ }
+}
+
+void initStack(Stack *s, size_t size){
+  s->x = (int *) malloc(size*sizeof(int)); 
+  s->y = (int *) malloc(size*sizeof(int));
+  s->top = -1;
+  s->size = size; 
 }
