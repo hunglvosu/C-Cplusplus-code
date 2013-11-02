@@ -25,10 +25,11 @@ int main(){
    for(j = 0; j < m[i]; j++){
 	scanf("%d", &data[i][j]);
   }
+  data[i] = qsort(data[i], m[i]);
  }
  printdata();
- init(); 
- solve();
+ //init(); 
+ //solve();
 }
 
 void init(){
